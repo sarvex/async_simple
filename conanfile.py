@@ -54,9 +54,7 @@ class AsyncSimpleConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", dst=osp.join(self.package_folder, "licenses"), src=self.source_folder)
         if self.options.header_only:
-            excludes = None
-            if self.settings.os in ["Macos"]:
-                excludes = 'uthread', 'test'
+            excludes = ('uthread', 'test') if self.settings.os in ["Macos"] else None
             copy(self, pattern="*.h",
                  dst=osp.join(self.package_folder, "include/async_simple"),
                  src=osp.join(self.source_folder, "async_simple"),
@@ -73,10 +71,13 @@ class AsyncSimpleConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "async_simple"
         self.cpp_info.components["async_simple"].names["cmake_find_package"] = "async_simple"
         if self.options.header_only:
-            self.cpp_info.components["async_simple"].set_property("cmake_target_name",
-                                                                  f"async_simple::async_simple_header_only")
+            self.cpp_info.components["async_simple"].set_property(
+                "cmake_target_name", "async_simple::async_simple_header_only"
+            )
         else:
-            self.cpp_info.components["async_simple"].set_property("cmake_target_name", f"async_simple::async_simple")
+            self.cpp_info.components["async_simple"].set_property(
+                "cmake_target_name", "async_simple::async_simple"
+            )
 
         if self.settings.os in ["Macos"]:
             self.cpp_info.components["async_simple"].defines = ["ASYNC_SIMPLE_HAS_NOT_AIO=1"]

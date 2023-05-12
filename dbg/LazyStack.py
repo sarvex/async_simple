@@ -35,7 +35,7 @@ class SymValueWrapper():
         return self.sym
 
     def __str__(self):
-        return str(self.sym) + " = " + str(self.val)
+        return f"{str(self.sym)} = {str(self.val)}"
 
 class LazyGetType(object):
     def __init__(self, cls):
@@ -99,7 +99,7 @@ class StacklessCoroutineFrameDecorator(FrameDecorator):
 
         self.resume_func = dereference(self.coro_frame.resume_addr)
         self.resume_func_block = gdb.block_for_pc(self.resume_func)
-        if self.resume_func_block == None:
+        if self.resume_func_block is None:
             raise Exception('Not stackless coroutine.')
         self.line_info = gdb.find_pc_line(self.resume_func)
 
@@ -132,14 +132,18 @@ class StripDecorator(FrameDecorator):
         f = frame.function()
         self.function_name = f
         self.elided_frames = None
-        self.linkage_name = frame.func_linkage_name() + ".coro_frame_ty"
+        self.linkage_name = f"{frame.func_linkage_name()}.coro_frame_ty"
         if not isinstance(f, str):
             self.template_arguments = []
             return
 
     def __str__(self, shift = 2):
-        addr = "" if self.address() == None else '%#x' % self.address() + " in "
-        location = "" if self.filename() == None else " at " + self.filename() + ":" + str(self.line())
+        addr = "" if self.address() is None else '%#x' % self.address() + " in "
+        location = (
+            ""
+            if self.filename() is None
+            else f" at {self.filename()}:{str(self.line())}"
+        )
         return addr + self.function() + " " + str([str(args) for args in self.frame_args()]) + location
 
     def frame_type_str(self):
